@@ -280,6 +280,14 @@ static int check_message(const struct set_name_fn *fn, const char *op,
     return 0;
 }
 
+// This is a workaround for an XLC issue where it incorrectly
+// optimizes the ret and samename variables below.
+int _v3nametest_disable_opt = 0;
+static void _makeuseof(int a, int b)
+{
+  _v3nametest_disable_opt += a + b;
+}
+
 static int run_cert(X509 *crt, const char *nameincert,
                      const struct set_name_fn *fn)
 {
@@ -327,6 +335,7 @@ static int run_cert(X509 *crt, const char *nameincert,
         match = -1;
         ret = X509_check_email(crt, name, namelen, 0);
         if (fn->email) {
+            _makeuseof(ret,samename);
             if (ret && !samename)
                 match = 1;
             if (!ret && samename && strchr(nameincert, '@') != NULL)

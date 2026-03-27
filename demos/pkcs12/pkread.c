@@ -64,6 +64,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error opening file %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
+#ifdef __MVS__
+    set_tag_fd_binary(fileno(fp));
+#endif
     p12 = d2i_PKCS12_fp(fp, NULL);
     fclose(fp);
     if (p12 == NULL) {
@@ -82,6 +85,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error opening file %s\n", argv[1]);
         goto err;
     }
+#ifdef __MVS__
+    set_tag_fd_text(fileno(fp));
+#endif
     if (name != NULL)
         fprintf(fp, "***Friendly Name***\n%s\n", name);
     if (pkey != NULL) {

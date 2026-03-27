@@ -112,6 +112,16 @@ FILE *openssl_fopen(const char *filename, const char *mode)
     }
 # else
     file = fopen(filename, mode);
+#  ifdef __MVS__
+    if (file != NULL) {
+        //setup text conversion depending on the text/binary mode
+        if (strchr(mode, 'b')) {
+            set_tag_fd_binary(fileno(file));
+        } else {
+            set_tag_fd_text(fileno(file));
+        }
+    }
+#  endif
 # endif
     return file;
 }

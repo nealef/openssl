@@ -577,7 +577,7 @@ static bssl::UniquePtr<SSL_CTX> SetupCtx(const TestConfig *config) {
         DH_free(tmpdh);
         return nullptr;
     }
-    // This prime number is 2^1024 + 643 – a value just above a power of two.
+    // This prime number is 2^1024 + 643  a value just above a power of two.
     // Because of its form, values modulo it are essentially certain to be one
     // byte shorter. This is used to test padding of these values.
     if (BN_hex2bn(

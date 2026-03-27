@@ -11,6 +11,7 @@
 # define HEADER_EBCDIC_H
 
 # include <stdlib.h>
+# include <openssl/override.h>
 
 #ifdef  __cplusplus
 extern "C" {

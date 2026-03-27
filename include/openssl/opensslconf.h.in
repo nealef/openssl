@@ -11,6 +11,15 @@
 
 #include <openssl/opensslv.h>
 
+#ifdef __MVS__
+// we add this header to fix strcasecmp() function when compiling in ASCII mode
+#include <strings.h>
+// __getenv() returns a unique character pointer for each environmental variable
+// // This is what gcc's version of getenv does (xlc's version returns the same pointer)
+#define getenv(...) __getenv(__VA_ARGS__)
+#include <openssl/override.h>
+#endif
+
 #ifdef  __cplusplus
 extern "C" {
 #endif

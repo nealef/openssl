@@ -27,6 +27,8 @@
 
 #define TICKET_NONCE_SIZE       8
 
+#undef OPENSSL_NO_ERR
+
 typedef struct {
   ASN1_TYPE *kxBlob;
   ASN1_TYPE *opaqueBlob;

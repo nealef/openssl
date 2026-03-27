@@ -2623,6 +2623,12 @@ BIO *bio_open_owner(const char *filename, int format, int private)
     fp = fdopen(fd, modestr('w', format));
     if (fp == NULL)
         goto err;
+#ifdef __MVS__
+    if (textmode)
+        set_tag_fd_text(fileno(fp));
+    else
+        set_tag_fd_binary(fileno(fp));
+#endif
     bflags = BIO_CLOSE;
     if (textmode)
         bflags |= BIO_FP_TEXT;

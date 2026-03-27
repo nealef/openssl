@@ -52,7 +52,7 @@ static int test_bad_asn1(void)
     int derlen;
     int len;
 
-    bio = BIO_new_file(test_file, "r");
+    bio = BIO_new_file(test_file, "rb");
     if (!TEST_ptr(bio))
         return 0;
 

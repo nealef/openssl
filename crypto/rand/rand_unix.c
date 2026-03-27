@@ -340,6 +340,28 @@ static ssize_t sysctl_random(char *buf, size_t buflen)
 #    endif
 #   endif
 
+#if defined(__MVS__) || defined(__VM__)
+
+# define KMC_PRNG 67
+
+static inline void
+PRNG(void *cv, void *iv, int lIV, void *res)
+{
+    int op = KMC_PRNG;
+
+    asm ("   L    0,%0\n"
+         "   LR   1,%1\n"
+         "   LR   2,%2\n"
+         "   LR   3,%3\n" 
+         "   LR   10,%4\n" 
+         "   KMC  10,2\n"
+         "   JO   *-4\n" 
+         : : "m" (op), "r" (cv), 
+             "r" (iv), "r" (lIV), "r" (res)
+         : "cc", "0", "1", "2", "3", "10");
+}
+#endif
+
 /*
  * syscall_random(): Try to get random data using a system call
  * returns the number of bytes returned in buf, or < 0 on error.
@@ -400,6 +422,81 @@ static ssize_t syscall_random(void *buf, size_t buflen)
     return syscall(__NR_getrandom, buf, buflen, 0);
 #  elif (defined(__FreeBSD__) || defined(__NetBSD__)) && defined(KERN_ARND)
     return sysctl_random(buf, buflen);
+#  elif defined(__MVS__) || defined(__VM__)
+#   define PRNG_LIMIT 4096
+
+    static const uint8_t prngIV[] =
+     { 0x0f, 0x2b, 0x8e, 0x63, 0x8c, 0x8e, 0xd2, 0x52,
+       0x64, 0xb7, 0xa0, 0x7b, 0x75, 0x28, 0xb8, 0xf4,
+       0x75, 0x5f, 0xd2, 0xa6, 0x8d, 0x97, 0x11, 0xff,
+       0x49, 0xd8, 0x23, 0xf3, 0x7e, 0x21, 0xec, 0xa0
+     };
+
+    static uint8_t *prngCV = NULL;
+
+    static int prngCount = PRNG_LIMIT;
+
+    int nRounds = buflen / sizeof(prngIV),
+        lastRnd = sizeof(prngIV) - (buflen % sizeof(prngIV));
+    uint32_t rnd[8] __attribute__((__aligned__(8)));
+    uint16_t seedVec[3];
+    uint64_t tod;
+
+    asm ("    STCKF  %0\n"
+         : "=m" (tod) : : "cc");
+
+    /*
+     * Initialize PRNG vector if not present
+     */
+    if (prngCV == NULL) {
+        prngCV = malloc(sizeof(prngIV));
+        memcpy(prngCV, prngIV, sizeof(prngIV));
+    }
+
+    /*
+     * If we need to renew vector then generate entropy
+     * based on the current vector
+     */
+    if (prngCount == PRNG_LIMIT) {
+        srand48((uint32_t) tod);
+        rnd[0] = nrand48(seedVec); rnd[1] = nrand48(seedVec); 
+        rnd[2] = nrand48(seedVec); rnd[3] = nrand48(seedVec);
+        rnd[4] = nrand48(seedVec); rnd[5] = nrand48(seedVec); 
+        rnd[6] = nrand48(seedVec); rnd[7] = nrand48(seedVec);
+        PRNG(prngCV, &rnd, sizeof(rnd), &rnd);
+        memcpy(prngCV, &rnd, sizeof(rnd));
+        prngCount = 0;
+    }
+
+    /*
+     * Run PRNG on blocks of vector size
+     */
+    for (int i = 0; i < nRounds; i++) {
+        rnd[0] = nrand48(seedVec); rnd[1] = nrand48(seedVec); 
+        rnd[2] = nrand48(seedVec); rnd[3] = nrand48(seedVec);
+        rnd[4] = nrand48(seedVec); rnd[5] = nrand48(seedVec); 
+        rnd[6] = nrand48(seedVec); rnd[7] = nrand48(seedVec);
+        PRNG(prngCV, &rnd, sizeof(rnd), &rnd);
+        memcpy(buf, &rnd, sizeof(rnd));
+        buf += (uintptr_t) sizeof(rnd);
+        prngCount += sizeof(prngCV);
+    }
+
+    /*
+     * If the size we required was not a vector size multiple then
+     * run one last time and more time
+     */
+    if (lastRnd < sizeof(prngCV)) {                                              
+        rnd[0] = nrand48(seedVec); rnd[1] = nrand48(seedVec); 
+        rnd[2] = nrand48(seedVec); rnd[3] = nrand48(seedVec);
+        rnd[4] = nrand48(seedVec); rnd[5] = nrand48(seedVec); 
+        rnd[6] = nrand48(seedVec); rnd[7] = nrand48(seedVec);
+        PRNG(prngCV, &rnd, sizeof(rnd), &rnd);
+        memcpy(buf, &rnd, lastRnd);
+        prngCount += sizeof(prngCV);
+    }
+
+    return buflen;
 #  else
     errno = ENOSYS;
     return -1;

@@ -24,6 +24,8 @@
 #include <openssl/engine.h>
 #include <internal/cryptlib.h>
 
+#undef OPENSSL_NO_ERR
+
 static MSG_PROCESS_RETURN tls_process_as_hello_retry_request(SSL *s, PACKET *pkt);
 static MSG_PROCESS_RETURN tls_process_encrypted_extensions(SSL *s, PACKET *pkt);
 

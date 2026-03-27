@@ -30,6 +30,36 @@
 #define INCLUDE_FUNCTION_TABLE
 #include "progs.h"
 
+#ifdef __MVS__
+#pragma runopts(FILETAG(AUTOCVT, AUTOTAG) POSIX(ON))
+#include <signal.h>
+#include <ctest.h>
+#include <leawi.h>    
+#include <ceeedcct.h> 
+
+/**
+ * @brief Abnormal termination handling and setup
+ *
+ */
+static void 
+handler(int sig, siginfo_t *si, void *unused)
+{
+    fprintf(stderr, "Signal Handler Invoked\n");
+    ctrace("Signal");
+    _exit(1);
+}
+
+static void                                              
+abendHandler(_FEEDBACK *fc, _INT4 *token, _INT4 *result, 
+                     _FEEDBACK *newfc)                           
+{                                                        
+    fprintf(stderr, "Abnormal Termination Handler Invoked\n");
+    ctrace("Abend");
+    _exit(2);
+}
+
+#endif
+
 /* Structure to hold the number of columns to be displayed and the
  * field width used to display them.
  */
@@ -118,6 +148,37 @@ static char *make_config_name(void)
 
 int main(int argc, char *argv[])
 {
+#if defined(__MVS__) || defined(__VM__)
+    struct sigaction sa;
+    _FEEDBACK fc;  
+    _ENTRY hdlr;
+    _INT4 token;   
+
+    __initASCIIlib_a();
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = handler;
+    if (sigaction(SIGSEGV, &sa, NULL) == -1)
+        perror("sigaction");
+    if (sigaction(SIGFPE, &sa, NULL) == -1)
+        perror("sigaction");
+    if (sigaction(SIGILL, &sa, NULL) == -1)
+        perror("sigaction");
+    token = 0;                                              
+    hdlr.address = (_POINTER) &abendHandler;             
+    hdlr.nesting = NULL;                                 
+                                                                    
+    CEEHDLR(&hdlr, &token, &fc);                         
+
+    /* verify that CEEHDLR was successful */
+    if (_FBCHECK(fc , CEE000) != 0) {
+        fprintf(stderr, "CEEHDLR failed with message number %d\n",
+                fc.tok_msgno);
+        exit (2999);
+    } else 
+        fprintf(stderr, "CEEHDLR established: %p\n", abendHandler);
+	init_attr_stdio();
+#endif
     FUNCTION f, *fp;
     LHASH_OF(FUNCTION) *prog = NULL;
     char **copied_argv = NULL;
@@ -272,6 +333,9 @@ int main(int argc, char *argv[])
         ret = 1;
 #endif
     BIO_free(bio_err);
+#if defined(__MVS__) || defined(__VM__)
+    CEEHDLU(&hdlr, &fc);
+#endif
     EXIT(ret);
 }
 

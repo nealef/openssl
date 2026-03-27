@@ -331,6 +331,10 @@ case "${SYSTEM}:${RELEASE}:${VERSION}:${MACHINE}" in
     vxworks*)
        echo "${MACHINE}-whatever-vxworks"; exit 0;
        ;;
+
+    OS/390:*)
+       echo "${MACHINE}-whatever-zos"; exit 0;
+       ;;
 esac
 
 #
@@ -426,6 +430,10 @@ fi
 
 if [ "${SYSTEM}" = "AIX" ]; then	# favor vendor cc over gcc
     (cc) 2>&1 | grep -iv "not found" > /dev/null && CC=cc
+fi
+
+if [ "${SYSTEM}" = "OS/390" ]; then
+    (xlc) 2>&1 | grep -iv "not found" > /dev/null && CC=xlc
 fi
 
 CCVER=${CCVER:-0}

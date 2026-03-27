@@ -106,7 +106,14 @@ int enc_main(int argc, char **argv)
     OPTION_CHOICE o;
     int bsize = BSIZE, verbose = 0, debug = 0, olb64 = 0, nosalt = 0;
     int enc = 1, printkey = 0, i, k;
+#ifdef __MVS__
+    // On z/OS, we use text format in order to enable automatic conversion
+    // between code pages. A side effect would be translation of line endings,
+    // but it doesn't occur on Unix-based systems, including z/OS USS.
+    int base64 = 0, informat = FORMAT_TEXT, outformat = FORMAT_TEXT;
+#else
     int base64 = 0, informat = FORMAT_BINARY, outformat = FORMAT_BINARY;
+#endif
     int ret = 1, inl, nopad = 0;
     unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
     unsigned char *buff = NULL, salt[PKCS5_SALT_LEN];

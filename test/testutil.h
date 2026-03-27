@@ -10,6 +10,10 @@
 #ifndef OSSL_TESTUTIL_H
 # define OSSL_TESTUTIL_H
 
+#ifdef __VM__
+#pragma export(setup_tests)
+#endif
+
 #include <stdarg.h>
 
 #include <openssl/err.h>

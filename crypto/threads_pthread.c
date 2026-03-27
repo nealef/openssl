@@ -131,7 +131,13 @@ int CRYPTO_THREAD_init_local(CRYPTO_THREAD_LOCAL *key, void (*cleanup)(void *))
 
 void *CRYPTO_THREAD_get_local(CRYPTO_THREAD_LOCAL *key)
 {
+#ifdef _OPEN_THREADS
+    void *value = NULL;
+    pthread_getspecific(*key, &value);
+    return value;
+#else
     return pthread_getspecific(*key);
+#endif
 }
 
 int CRYPTO_THREAD_set_local(CRYPTO_THREAD_LOCAL *key, void *val)
