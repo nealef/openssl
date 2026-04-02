@@ -149,34 +149,7 @@ static char *make_config_name(void)
 int main(int argc, char *argv[])
 {
 #if defined(__MVS__) || defined(__VM__)
-    struct sigaction sa;
-    _FEEDBACK fc;  
-    _ENTRY hdlr;
-    _INT4 token;   
-
     __initASCIIlib_a();
-    sa.sa_flags = SA_SIGINFO;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_sigaction = handler;
-    if (sigaction(SIGSEGV, &sa, NULL) == -1)
-        perror("sigaction");
-    if (sigaction(SIGFPE, &sa, NULL) == -1)
-        perror("sigaction");
-    if (sigaction(SIGILL, &sa, NULL) == -1)
-        perror("sigaction");
-    token = 0;                                              
-    hdlr.address = (_POINTER) &abendHandler;             
-    hdlr.nesting = NULL;                                 
-                                                                    
-    CEEHDLR(&hdlr, &token, &fc);                         
-
-    /* verify that CEEHDLR was successful */
-    if (_FBCHECK(fc , CEE000) != 0) {
-        fprintf(stderr, "CEEHDLR failed with message number %d\n",
-                fc.tok_msgno);
-        exit (2999);
-    } else 
-        fprintf(stderr, "CEEHDLR established: %p\n", abendHandler);
 	init_attr_stdio();
 #endif
     FUNCTION f, *fp;
@@ -333,9 +306,6 @@ int main(int argc, char *argv[])
         ret = 1;
 #endif
     BIO_free(bio_err);
-#if defined(__MVS__) || defined(__VM__)
-    CEEHDLU(&hdlr, &fc);
-#endif
     EXIT(ret);
 }
 
