@@ -431,7 +431,7 @@ int BIO_sock_info(int sock,
  */
 int BIO_socket_wait(int fd, int for_read, time_t max_time)
 {
-#if defined(OPENSSL_SYS_WINDOWS) || !defined(POLLIN)
+#if defined(OPENSSL_SYS_WINDOWS) || !defined(POLLIN) || defined(OPENSSL_SYS_ZVM)
     fd_set confds;
     struct timeval tv;
     time_t now;

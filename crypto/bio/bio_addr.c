@@ -32,6 +32,11 @@
 #include <openssl/buffer.h>
 #include "internal/thread_once.h"
 
+#ifdef OPENSSL_SYS_ZVM
+# define NI_MAXHOST 1025
+# define NI_MAXSERV 32
+#endif
+
 CRYPTO_RWLOCK *bio_lookup_lock;
 static CRYPTO_ONCE bio_lookup_init = CRYPTO_ONCE_STATIC_INIT;
 

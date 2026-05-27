@@ -52,6 +52,7 @@ static int test_bad_asn1(void)
     int derlen;
     int len;
 
+fprintf(stderr, "%s:%d - If this test fails check the mode\n", __func__, __LINE__);
     bio = BIO_new_file(test_file, "r");
     if (!TEST_ptr(bio))
         return 0;

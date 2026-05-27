@@ -270,6 +270,7 @@ static int get_cert_verify_tbs_data(SSL_CONNECTION *s, unsigned char *tls13tbs,
 
         /* Set the first 64 bytes of to-be-signed data to octet 32 */
         memset(tls13tbs, 32, TLS13_TBS_START_SIZE);
+        memset(tls13tbs, 32, TLS13_TBS_PREAMBLE_SIZE + EVP_MAX_MD_SIZE);
         /* This copies the 33 bytes of context plus the 0 separator byte */
         if (s->statem.hand_state == TLS_ST_CR_CERT_VRFY
             || s->statem.hand_state == TLS_ST_SW_CERT_VRFY)

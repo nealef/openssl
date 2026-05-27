@@ -4950,6 +4950,10 @@ static int do_multi(int multi, int size_num)
             BIO_printf(bio_err, "pipe failure\n");
             exit(1);
         }
+#ifdef OPENSSL_SYS_ZVM
+        set_tag_fd_text(fd[0]);
+        set_tag_fd_text(fd[1]);
+#endif
         fflush(stdout);
         (void)BIO_flush(bio_err);
         if (fork()) {

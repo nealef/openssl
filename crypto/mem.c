@@ -250,7 +250,7 @@ void *CRYPTO_aligned_alloc(size_t num, size_t alignment, void **freeptr,
 
     /* Allow non-malloc() allocations as long as no malloc_impl is provided. */
     if (malloc_impl == CRYPTO_malloc) {
-#if defined(_BSD_SOURCE) || (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L)
+#if defined(_BSD_SOURCE) || (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L) && !defined(OPENSSL_SYS_ZVM)
         int memalign_ret;
 
         /* posix_memalign() requires alignment to be at least sizeof(void *) */

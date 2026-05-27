@@ -159,7 +159,11 @@ int enc_main(int argc, char **argv)
     OPTION_CHOICE o;
     int bsize = BSIZE, verbose = 0, debug = 0, olb64 = 0, nosalt = 0;
     int enc = 1, printkey = 0, i, k;
+#ifndef OPENSSL_SYS_ZVM
     int base64 = 0, informat = FORMAT_BINARY, outformat = FORMAT_BINARY;
+#else
+    int base64 = 0, informat = FORMAT_BINARY, outformat = FORMAT_TEXT;
+#endif
     int ret = 1, inl, nopad = 0;
     unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
     int rawkey_set = 0;

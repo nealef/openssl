@@ -64,6 +64,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error opening file %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
+#ifdef OPENSSL_SYS_ZVM
+    set_tag_fd_bianry(fileno(fp));
+#endif
     p12 = d2i_PKCS12_fp(fp, NULL);
     fclose(fp);
     if (p12 == NULL) {
@@ -82,6 +85,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error opening file %s\n", argv[3]);
         goto err;
     }
+#ifdef OPENSSL_SYS_ZVM
+    set_tag_fd_bianry(fileno(fp));
+#endif
     if (name != NULL)
         fprintf(fp, "***Friendly Name***\n%s\n", name);
     if (pkey != NULL) {

@@ -38,6 +38,10 @@
 #include "engine_loader.h"
 #include "app_libctx.h"
 
+#ifdef OPENSSL_SYS_ZVM
+#include <libtag.h>
+#endif
+
 /*
  * quick macro when you need to pass an unsigned char instead of a char.
  * this is true for some implementations of the is*() functions, for

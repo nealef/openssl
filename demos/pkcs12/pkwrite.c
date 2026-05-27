@@ -31,6 +31,9 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error opening file %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
+#ifdef OPENSSL_SYS_ZVM
+    set_tag_fd_bianry(fileno(fp));
+#endif
     cert = PEM_read_X509(fp, NULL, NULL, NULL);
     rewind(fp);
     pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
@@ -46,6 +49,9 @@ int main(int argc, char **argv)
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
     }
+#ifdef OPENSSL_SYS_ZVM
+    set_tag_fd_bianry(fileno(fp));
+#endif
     i2d_PKCS12_fp(fp, p12);
     PKCS12_free(p12);
     fclose(fp);

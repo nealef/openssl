@@ -3184,8 +3184,16 @@ BIO *bio_open_owner(const char *filename, int format, int private)
     if (fp == NULL)
         goto err;
     bflags = BIO_CLOSE;
+#ifndef OPENSSL_SYS_ZVM
     if (textmode)
         bflags |= BIO_FP_TEXT;
+#else
+    if (textmode) {
+        set_tag_fd_text(fileno(fp));
+        bflags |= BIO_FP_TEXT;
+    } else 
+        set_tag_fd_binary(fileno(fp));
+#endif
     b = BIO_new_fp(fp, bflags);
     if (b != NULL)
         return b;

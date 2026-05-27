@@ -248,7 +248,7 @@ static int poll_two_fds(int rfd, int rfd_want_read,
     OSSL_TIME deadline,
     CRYPTO_MUTEX *mutex)
 {
-#if defined(OPENSSL_SYS_WINDOWS) || !defined(POLLIN)
+#if defined(OPENSSL_SYS_WINDOWS) || !defined(POLLIN) || defined(OPENSSL_SYS_ZVM)
     fd_set rfd_set, wfd_set, efd_set;
     OSSL_TIME now, timeout;
     struct timeval tv, *ptv;

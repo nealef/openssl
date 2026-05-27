@@ -269,7 +269,7 @@ static int test_drbg_reseed(int expect_success,
     return 1;
 }
 
-#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD)
+#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD) 
 /* number of children to fork */
 #define DRBG_FORK_COUNT 9
 /* two results per child, two for the parent */
@@ -885,7 +885,7 @@ err:
 int setup_tests(void)
 {
     ADD_TEST(test_rand_reseed);
-#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD)
+#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD) && !defined(OPENSSL_SYS_ZVM)
     ADD_ALL_TESTS(test_rand_fork_safety, RANDOM_SIZE);
 #endif
     ADD_TEST(test_rand_prediction_resistance);

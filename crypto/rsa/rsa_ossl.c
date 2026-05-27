@@ -229,8 +229,12 @@ static uintptr_t get_unique_thread_id(void)
         CRYPTO_THREAD_set_local_ex(CRYPTO_THREAD_LOCAL_TANDEM_ID_KEY, NULL, (void *)thread_id);
     }
     return thread_id;
-#else
+#elif !defined(OPENSSL_SYS_ZVM)
     return (uintptr_t)CRYPTO_THREAD_get_current_id();
+#else
+    pthread_t tid = CRYPTO_THREAD_get_current_id();
+    uintptr_t *thid = (uintptr_t *) &tid.__[4];
+    return *thid;
 #endif
 }
 

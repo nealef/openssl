@@ -396,8 +396,16 @@ static int open_console(UI *ui)
 #endif
     if ((tty_in = fopen(DEV_TTY, "r")) == NULL)
         tty_in = stdin;
+#ifdef OPENSSL_SYS_ZVM
+    else 
+        set_tag_fd_text_ro(fileno(tty_in));
+#endif
     if ((tty_out = fopen(DEV_TTY, "w")) == NULL)
         tty_out = stderr;
+#ifdef OPENSSL_SYS_ZVM
+    else 
+        set_tag_fd_text_ro(fileno(tty_out));
+#endif
 #endif
 
 #if defined(TTY_get) && !defined(OPENSSL_SYS_VMS)
@@ -639,6 +647,9 @@ static void popsig(void)
 #ifdef SIGACTION
         sigaction(i, &savsig[i], NULL);
 #else
+# ifdef OPENSSL_SYS_ZVM
+        if (savsig[i] != SIG_ERR)
+# endif
         signal(i, savsig[i]);
 #endif
     }

@@ -237,7 +237,11 @@ static void init_thread_destructor(void *hands)
 }
 
 static CRYPTO_ONCE ossl_init_thread_runonce = CRYPTO_ONCE_STATIC_INIT;
+#ifndef OPENSSL_SYS_ZVM
 static CRYPTO_THREAD_ID recursion_guard = (CRYPTO_THREAD_ID)-1;
+#else
+static CRYPTO_THREAD_ID recursion_guard = { .__ = {-1, -1, -1, -1, -1, -1, -1, -1 }};
+#endif
 
 DEFINE_RUN_ONCE_STATIC(ossl_init_thread_once)
 {
@@ -246,7 +250,11 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_thread_once)
             init_thread_destructor))
         return 0;
 
+#ifndef OPENSSL_SYS_ZVM
     recursion_guard = (CRYPTO_THREAD_ID)0;
+#else
+    memset(&recursion_guard, 0, sizeof(recursion_guard));
+#endif
     return 1;
 }
 

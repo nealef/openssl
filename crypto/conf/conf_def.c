@@ -169,7 +169,7 @@ static int def_load(CONF *conf, const char *name, long *line)
     int ret;
     BIO *in = NULL;
 
-#ifdef OPENSSL_SYS_VMS
+#if defined(OPENSSL_SYS_VMS) || defined(OPENSSL_SYS_ZVM)
     in = BIO_new_file(name, "r");
 #else
     in = BIO_new_file(name, "rb");

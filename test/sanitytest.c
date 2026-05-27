@@ -255,7 +255,7 @@ static int test_sanity_sleep(int i)
     OSSL_TIME start = ossl_time_now();
     uint64_t ms;
 
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L && !defined(OPENSSL_SYS_ZVM)
     /*
      * Set up an interrupt timer to check that OSSL_sleep doesn't return early
      * due to interrupts.
@@ -290,7 +290,7 @@ static int test_sanity_sleep(int i)
      */
     OSSL_sleep(td->val);
 
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L && !defined(OPENSSL_SYS_ZVM)
     /* disarm the timer */
     do {
         static const struct itimerval it;

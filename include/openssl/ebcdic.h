@@ -17,6 +17,9 @@
 #endif
 
 #include <stdlib.h>
+#ifdef OPENSSL_SYS_ZVM
+# include <openssl/override.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
